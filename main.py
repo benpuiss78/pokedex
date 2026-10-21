@@ -1,5 +1,17 @@
 from fastapi import FastAPI, HTTPException
 import requests
+import sqlite3
+from pydantic import BaseModel, EmailStr, Field
+
+class Pokemon(BaseModel):
+    number : int
+    name : str
+    name_fr : str
+    types : list[str]
+    image_url : str
+    height : int
+    weight : int
+    evolves_from_number : int
 
 app = FastAPI()
 
