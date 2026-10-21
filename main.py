@@ -35,20 +35,21 @@ def get_pokemon(number: int):
 
 @app.get("/pokemons/{number}/scan", response_model=Pokemon)
 def scan_pokemon(number: int):
-    pokemon_data = get_pokemon_from_api(number)
-    fr_name = get_pokemon_fr_name(number)
-    if isinstance(pokemon_data, int):
-        raise HTTPException(status_code=pokemon_data, detail = "Erreur " +str(pokemon_data))
-    if isinstance(fr_name, int):
-            raise HTTPException(status_code=fr_name, detail = "Erreur " +str(fr_name))
+    try:
+        pokemon_data = get_pokemon_from_api(number)
+        fr_name = get_pokemon_fr_name(number)
+        fr_types = [get_fr_type_name(t["type"]["name"]) for t in pokemon_data["types"]]
+    except requests.RequestException:
+        raise HTTPException(status_code=404, detail="Impossible de récupérer le Pokémon")
+         
     pokemon = Pokemon(
         number=pokemon_data["id"],
         name=pokemon_data["name"],
         name_fr=str(fr_name),
-        types=[get_fr_type_name(t["type"]["name"]) for t in pokemon_data["types"]],
+        types=fr_types,
         image_url=pokemon_data["sprites"]["front_default"],
-        height=pokemon_data["height"],
-        weight=pokemon_data["weight"],
+        height=pokemon_data["height"] * 10, #conversion en cm
+        weight=pokemon_data["weight"] * 100, # conversion en grammes
         evolves_from_number=0,
     )
     #insert_pokemon(pokemon)
