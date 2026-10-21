@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import requests
 from schemas.pokemon import Pokemon
-from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name
+from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name, get_fr_type_name
 from db.database import get_connection
 from repositories.pokemon_repository import insert_pokemon
 
@@ -45,7 +45,7 @@ def scan_pokemon(number: int):
         number=pokemon_data["id"],
         name=pokemon_data["name"],
         name_fr=str(fr_name),
-        types=[t["type"]["name"] for t in pokemon_data["types"]],
+        types=[get_fr_type_name(t["type"]["name"]) for t in pokemon_data["types"]],
         image_url=pokemon_data["sprites"]["front_default"],
         height=pokemon_data["height"],
         weight=pokemon_data["weight"],
