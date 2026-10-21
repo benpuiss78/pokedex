@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import requests
 from schemas.pokemon import Pokemon
-from clients.pokeapi import get_pokemon_from_api
+from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name
 from db.database import get_connection
 from repositories.pokemon_repository import insert_pokemon
 
@@ -23,7 +23,7 @@ def get_pokemon(number: int):
     err_code = reponse.status_code
 
     if err_code != 200:
-        raise HTTPException(status_code=err_code, detail = "Erreur")
+        raise HTTPException(status_code=err_code, detail = "Erreur " +str(data))
     
     data = reponse.json()
     return {
@@ -35,18 +35,22 @@ def get_pokemon(number: int):
 
 @app.get("/pokemons/{number}/scan", response_model=Pokemon)
 def scan_pokemon(number: int):
-    data = get_pokemon_from_api(number)
-    if isinstance(data, int):
-        raise HTTPException(status_code=data, detail = "Erreur")
+    pokemon_data = get_pokemon_from_api(number)
+    fr_name = get_pokemon_fr_name(number)
+    if isinstance(pokemon_data, int):
+        raise HTTPException(status_code=pokemon_data, detail = "Erreur " +str(pokemon_data))
+    if isinstance(fr_name, int):
+            raise HTTPException(status_code=fr_name, detail = "Erreur " +str(fr_name))
     pokemon = Pokemon(
-        number=data["id"],
-        name=data["name"],
-        name_fr=data["name"],
-        types=[t["type"]["name"] for t in data["types"]],
-        image_url=data["sprites"]["front_default"],
-        height=data["height"],
-        weight=data["weight"],
+        number=pokemon_data["id"],
+        name=pokemon_data["name"],
+        name_fr=str(fr_name),
+        types=[t["type"]["name"] for t in pokemon_data["types"]],
+        image_url=pokemon_data["sprites"]["front_default"],
+        height=pokemon_data["height"],
+        weight=pokemon_data["weight"],
         evolves_from_number=0,
     )
-    insert_pokemon(pokemon)
+    #insert_pokemon(pokemon)
     return pokemon
+
