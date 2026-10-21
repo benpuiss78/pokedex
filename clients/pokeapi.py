@@ -31,4 +31,11 @@ def get_pre_evolution(number):
     reponse = requests.get(url)
     reponse.raise_for_status()
     data = reponse.json()
-    return data["evolves_from_species"]
+    if data["evolves_from_species"] is None:
+        return 0
+    url_pre_evolution = data["evolves_from_species"]["url"]
+    morceaux_url = url_pre_evolution.split("/")
+    pre_evolution_number = int(morceaux_url[6]) #Le 7eme élément de l'url correspon au number du pokemon
+    if pre_evolution_number > 151:
+        return 0
+    return pre_evolution_number
