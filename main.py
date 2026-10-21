@@ -1,17 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 import requests
-import sqlite3
-from pydantic import BaseModel, EmailStr, Field
-
-class Pokemon(BaseModel):
-    number : int
-    name : str
-    name_fr : str
-    types : list[str]
-    image_url : str
-    height : int
-    weight : int
-    evolves_from_number : int
+from schemas.pokemon import Pokemon
 
 app = FastAPI()
 
@@ -34,11 +23,10 @@ def get_pokemon(number: int):
         return {"Erreur de récuperation des infos du Pokemon dans l'API"}
     
     data = reponse.json()
-    reponse_json = {
+    return {
         "number": data["id"],
         "name": data["name"],
         "height": data["height"],
         "weight": data["weight"]
     }
-    return reponse_json
 
