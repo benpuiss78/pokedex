@@ -30,4 +30,5 @@ def get_pre_evolution(number):
     url = "https://pokeapi.co/api/v2/pokemon-species/"+  str(number)
     reponse = requests.get(url)
     reponse.raise_for_status()
-    return reponse.json()
+    data = reponse.json()
+    return data["evolves_from_species"]

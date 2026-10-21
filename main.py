@@ -19,12 +19,10 @@ def health_check():
 def get_pokemon(number: int):
     url = "https://pokeapi.co/api/v2/pokemon/" + str(number)
 
-    reponse = requests.get(url)
-    err_code = reponse.status_code
-
-    if err_code != 200:
-        raise HTTPException(status_code=err_code, detail = "Erreur " +str(data))
-    
+    try:
+        reponse = requests.get(url)
+    except requests.RequestException:
+        raise HTTPException(status_code=404, detail="Impossible de récupérer le Pokémon")
     data = reponse.json()
     return {
         "number": data["id"],
