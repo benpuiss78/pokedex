@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Détail du Pokémon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f5f7;
+            margin: 0;
+            padding: 25px;
+            color: #222;
+        }
+
+        main {
+            max-width: 750px;
+            margin: auto;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #2563eb;
+            text-decoration: none;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px #0001;
+        }
+
+        .header {
+            text-align: center;
+        }
+
+        .pokemon-image {
+            width: 200px;
+            height: 200px;
+            object-fit: contain;
+        }
+
+        .number {
+            color: #777;
+        }
+
+        .types {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .type-badge {
+            padding: 7px 12px;
+            border-radius: 20px;
+            background: #e5e7eb;
+            font-weight: bold;
+        }
+
+        .type-electrik {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .type-insecte {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .type-poison {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .type-feu {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .type-eau {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .type-plante {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .type-vol {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .type-normal {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .type-combat {
+            background: #ffedd5;
+            color: #9a3412;
+        }
+
+        .type-psy {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .type-roche {
+            background: #e7e5e4;
+            color: #44403c;
+        }
+
+        .type-sol {
+            background: #fef3c7;
+            color: #78350f;
+        }
+
+        .type-spectre {
+            background: #e9d5ff;
+            color: #581c87;
+        }
+
+        .type-glace {
+            background: #cffafe;
+            color: #155e75;
+        }
+
+        .type-dragon {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .type-acier {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .type-fee {
+            background: #fce7f3;
+            color: #9d174d;
+        }
+
+        .infos {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .label {
+            display: block;
+            color: #777;
+            margin-bottom: 7px;
+            font-size: 0.9rem;
+        }
+
+        .value,
+        .value_link {
+            font-weight: bold;
+        }
+
+        .value_link {
+            color: #0000ee;
+            text-decoration: underline;
+
+        }
+
+        #message {
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 500px) {
+            body {
+                padding: 12px;
+            }
+
+            .infos {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <a class="back" href="pokedex.html">
+            ← Retour au Pokédex
+        </a>
+
+        <section class="card" id="content">
+            <p id="message">Chargement du Pokémon…</p>
+        </section>
+    </main>
+
+    <script>
+        const API_URL = "http://127.0.0.1:8000";
+        const content = document.getElementById("content");
+
+        function normalizeType(type) {
+            return String(type)
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, "-")
+                .replace(/^-|-$/g, "");
+        }
+
+        function getTypes(types) {
+            if (Array.isArray(types)) return types;
+
+            if (typeof types === "string") {
+                try {
+                    const parsed = JSON.parse(types);
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    return [types];
+                }
+            }
+
+            return [];
+        }
+
+        function addInfo(container, label, value, link = null) {
+            const item = document.createElement("div");
+            item.className = "info";
+
+            const labelElement = document.createElement("span");
+            labelElement.className = "label";
+            labelElement.textContent = label;
+
+            const valueElement = document.createElement("span");
+            valueElement.className = "value";
+            valueElement.textContent = value ?? "Non renseigné";
+            if (link) {
+                item.style.cursor = "pointer";
+                item.addEventListener("click", () => {
+                    window.location.href = `pokemon_detail.html?number=${link}`;;
+                });
+                valueElement.className = "value_link";
+            }
+            item.append(labelElement, valueElement);
+            container.appendChild(item);
+        }
+
+        function displayPokemon(pokemon, number) {
+            content.replaceChildren();
+
+            const header = document.createElement("div");
+            header.className = "header";
+
+            const image = document.createElement("img");
+            image.className = "pokemon-image";
+            image.src = pokemon.image_url || "";
+            image.alt = pokemon.name_fr || pokemon.name || "Pokémon";
+            image.onerror = () => {
+                image.style.visibility = "hidden";
+            };
+
+            const numberElement = document.createElement("p");
+            numberElement.className = "number";
+            numberElement.textContent =
+                `N° ${String(number).padStart(3, "0")}`;
+
+            const name = document.createElement("h1");
+            name.textContent = pokemon.name_fr || pokemon.name || "?";
+
+            const types = document.createElement("div");
+            types.className = "types";
+
+            getTypes(pokemon.types).forEach(type => {
+                const badge = document.createElement("span");
+                badge.className =
+                    `type-badge type-${normalizeType(type)}`;
+                badge.textContent = type;
+                types.appendChild(badge);
+            });
+
+            header.append(image, numberElement, name, types);
+            content.appendChild(header);
+
+            const infos = document.createElement("div");
+            infos.className = "infos";
+
+
+            addInfo(
+                infos,
+                "Taille",
+                pokemon.height != null ? `${pokemon.height / 100} m` : null
+            );
+            addInfo(
+                infos,
+                "Poids",
+                pokemon.weight != null ? `${pokemon.weight / 1000} kg` : null
+            );
+            addInfo(infos, "Nom original", pokemon.name);
+
+            if (pokemon.evolves_from_number) {
+                addInfo(infos, "Evolution précédente", `N° ${String(pokemon.evolves_from_number).padStart(3, "0")}`, pokemon.evolves_from_number);
+            }
+            content.appendChild(infos);
+
+        }
+
+        async function loadPokemon() {
+            const params = new URLSearchParams(location.search);
+            const number = Number(params.get("number"));
+
+            if (!Number.isInteger(number) || number < 1 || number > 151) {
+                document.getElementById("message").textContent =
+                    "Pokédex de la première génération uniquement. Numéro invalide, doit être compris entre 1 et 151.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/pokemons/${number}`);
+
+                if (response.status === 404) {
+                    document.getElementById("message").textContent =
+                        "Ce Pokémon n'est pas encore enregistré dans le Pokédex.";
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP ${response.status}`);
+                }
+
+                const pokemon = await response.json();
+                displayPokemon(pokemon, number);
+
+            } catch (error) {
+                document.getElementById("message").textContent =
+                    `Impossible de contacter l'API : ${error.message}.`;
+            }
+        }
+
+        loadPokemon();
+    </script>
+</body>
+
+</html>

@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Depends, Header
+from fastapi.middleware.cors import CORSMiddleware
 import requests
 from schemas.pokemon import Pokemon
 from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name, get_fr_type_name, get_pre_evolution
@@ -8,6 +9,13 @@ from services.pokemon_service import scan_pokemon
 from core.security import secure
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+    )
 
 @app.get("/")
 def root():
@@ -24,8 +32,6 @@ def get_pokemon_from_db(number: int):
         raise HTTPException(status_code=404, detail="Pokemon non présent dans la base de données")
     else :
         return data 
-
-
 
 @app.get("/pokemons/{number}/scan", response_model=Pokemon, dependencies=[Depends(secure)])
 def scan_pokemon_route(number: int):
