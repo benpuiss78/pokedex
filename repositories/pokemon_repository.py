@@ -89,3 +89,24 @@ def insert_type(type : Type):
             )
         connection.commit()
         connection.close()
+
+def get_all_pokemons():
+    connection = get_connection()
+    cursor = connection.execute("SELECT * FROM pokemon ORDER BY number")
+    rows = cursor.fetchall()
+    connection.close()
+    result = []
+    for row in rows:
+        pokemon = Pokemon(
+            number=row["number"],
+            name=row["name"],
+            name_fr=row["name_fr"],
+            types=json.loads(row["types"]),
+            image_url=row["image_url"],
+            height=row["height"],
+            weight=row["weight"],
+            evolves_from_number=row["evolves_from_number"],
+        )
+        result.append(pokemon)
+    return result
+    

@@ -3,7 +3,7 @@ import requests
 from schemas.pokemon import Pokemon
 from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name, get_fr_type_name, get_pre_evolution
 from db.database import get_connection
-from repositories.pokemon_repository import insert_pokemon, get_pokemon_by_number
+from repositories.pokemon_repository import insert_pokemon, get_pokemon_by_number, get_all_pokemons
 from services.pokemon_service import scan_pokemon
 
 app = FastAPI()
@@ -29,6 +29,10 @@ def get_pokemon_from_db(number: int):
 @app.get("/pokemons/{number}/scan", response_model=Pokemon)
 def scan_pokemon_route(number: int):
     return scan_pokemon(number)
+
+@app.get("/pokemons")
+def get_all_pokemons_from_db():
+    return get_all_pokemons()
 
 @app.get("/test/{number}")
 def test(number):

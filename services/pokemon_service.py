@@ -40,3 +40,4 @@ def scan_pokemon(number : int):
     else: #Si le pokemon est deja dans la database, on renvoie simplement ses infos
         pokemon = get_pokemon_by_number(number)
         return pokemon
+
