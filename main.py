@@ -17,20 +17,14 @@ def health_check():
     return {"status": "ok"}
 
 @app.get("/pokemons/{number}")
-def get_pokemon(number: int):
-    url = "https://pokeapi.co/api/v2/pokemon/" + str(number)
+def get_pokemon_from_db(number: int):
+    data = get_pokemon_by_number(number)
+    if (data == 0):
+        raise HTTPException(status_code=404, detail="Pokemon non présent dans la base de données")
+    else :
+        return data 
 
-    try:
-        reponse = requests.get(url)
-    except requests.RequestException:
-        raise HTTPException(status_code=404, detail="Impossible de récupérer le Pokémon")
-    data = reponse.json()
-    return {
-        "number": data["id"],
-        "name": data["name"],
-        "height": data["height"],
-        "weight": data["weight"]
-    }
+
 
 @app.get("/pokemons/{number}/scan", response_model=Pokemon)
 def scan_pokemon_route(number: int):
