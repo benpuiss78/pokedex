@@ -1,10 +1,11 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Header
 import requests
 from schemas.pokemon import Pokemon
 from clients.pokeapi import get_pokemon_from_api, get_pokemon_fr_name, get_fr_type_name, get_pre_evolution
 from db.database import get_connection
 from repositories.pokemon_repository import insert_pokemon, get_pokemon_by_number, get_all_pokemons
 from services.pokemon_service import scan_pokemon
+from core.security import secure
 
 app = FastAPI()
 
@@ -26,7 +27,7 @@ def get_pokemon_from_db(number: int):
 
 
 
-@app.get("/pokemons/{number}/scan", response_model=Pokemon)
+@app.get("/pokemons/{number}/scan", response_model=Pokemon, dependencies=[Depends(secure)])
 def scan_pokemon_route(number: int):
     return scan_pokemon(number)
 
