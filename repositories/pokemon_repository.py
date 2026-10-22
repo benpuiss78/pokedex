@@ -1,5 +1,6 @@
 import json
 from schemas.pokemon import Pokemon
+from schemas.type import Type
 from db.database import get_connection
 
 def get_pokemon_by_number(number : int):
@@ -50,3 +51,41 @@ def insert_pokemon(pokemon: Pokemon):
     )
     connection.commit()
     connection.close()
+
+def get_fr_type_by_name(type_name : str):
+    connection = get_connection()
+    cursor = connection.execute(
+        "SELECT name_fr FROM pokemon_types WHERE name = ?", (type_name,)
+    )
+    row = cursor.fetchone()
+    connection.close()
+
+    if row is None:
+        return 0
+    else : 
+        return Type(
+                    id=row["id"],
+                    name=row["name"],
+                    name_fr=row["name_fr"],
+                )
+
+def insert_type(type : Type):
+        connection = get_connection()
+        connection.execute(
+                """
+                INSERT INTO pokemon_types
+                (
+                    id,
+                    name,
+                    name_fr
+                )
+                VALUES (?, ?, ?)
+                """,
+                (
+                    type.id,
+                    type.name,
+                    type.name_fr,
+                )
+            )
+        connection.commit()
+        connection.close()
